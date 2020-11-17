@@ -29,7 +29,8 @@ func New(vmo *vmcontrollerv1.VerrazzanoMonitoringInstance, operatorConfig *confi
 	var deployments []*appsv1.Deployment
 
 	// Grafana
-	if vmo.Spec.Grafana.Enabled {
+	// PABHAT : We don't need this for dev profile
+	if vmo.Spec.Grafana.Enabled && !resources.IsDevProfile() {
 
 		deployment := createDeploymentElement(vmo, &vmo.Spec.Grafana.Storage, &vmo.Spec.Grafana.Resources, config.Grafana)
 		deployment.Spec.Template.Spec.Containers[0].ImagePullPolicy = config.Grafana.ImagePullPolicy
@@ -121,6 +122,7 @@ func New(vmo *vmcontrollerv1.VerrazzanoMonitoringInstance, operatorConfig *confi
 		deployments = append(deployments, deployment)
 	}
 
+	// PABHAT : We might not need this for dev profile
 	// Prometheus
 	if vmo.Spec.Prometheus.Enabled {
 		deployments = append(deployments, createPrometheusDeploymentElements(vmo, pvcToAdMap)...)
