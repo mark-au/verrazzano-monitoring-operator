@@ -57,7 +57,7 @@ func CreateConfigmaps(controller *Controller, vmo *vmcontrollerv1.VerrazzanoMoni
 	}
 
 	//configmap for alertmanager config
-	err = createAMConfigMapIfDoesntExist(controller, vmo, vmo.Spec.AlertManager.ConfigMap, map[string]string{constants.AlertManagerYaml: resources.GetDefaultAlertManagerConfiguration(vmo)})
+	err := createAMConfigMapIfDoesntExist(controller, vmo, vmo.Spec.AlertManager.ConfigMap, map[string]string{constants.AlertManagerYaml: resources.GetDefaultAlertManagerConfiguration(vmo)})
 	if err != nil {
 		zap.S().Errorf("Failed to create configmap %s for reason %v", vmo.Spec.AlertManager.ConfigMap, err)
 		return err
