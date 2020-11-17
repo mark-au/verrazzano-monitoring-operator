@@ -102,7 +102,9 @@ func TestVMODevProfileFullDeploymentSize(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	assert.Equal(t, 5, len(deployments), "Length of generated deployments")
+	// PABHAT : Grafana dashboards are part of system VMI
+	//assert.Equal(t, 5, len(deployments), "Length of generated deployments")
+	assert.Equal(t, 4, len(deployments), "Length of generated deployments")
 	assert.Equal(t, constants.VMOKind, deployments[0].ObjectMeta.OwnerReferences[0].Kind, "OwnerReferences is not set by default")
 }
 
