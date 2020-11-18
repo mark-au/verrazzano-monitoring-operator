@@ -27,37 +27,35 @@ func CreateConfigmaps(controller *Controller, vmo *vmcontrollerv1.VerrazzanoMoni
 	var configMaps []string
 	alertrulesMap := make(map[string]string)
 
-	// PABHAT : We don't need this for dev profile, for application deployment
 	// Configmap for Grafana dashboard
-	if resources.IsDevProfile() && vmo.Name == constants.SystemVMIName {
-		dashboardTemplateMap := map[string]string{"vmo-dashboard-provider.yml": constants.DashboardProviderTmpl}
-		// Only create the CM if it doesnt exist. This will allow us to override the provider file e.g. Verrazzano
-		err := createConfigMapIfDoesntExist(controller, vmo, vmo.Spec.Grafana.DashboardsConfigMap, dashboardTemplateMap)
-		if err != nil {
-			zap.S().Errorf("Failed to create dashboard configmap %s, for reason %v", vmo.Spec.Grafana.DashboardsConfigMap, err)
-			return err
+	dashboardTemplateMap := map[string]string{"vmo-dashboard-provider.yml": constants.DashboardProviderTmpl}
+	// Only create the CM if it doesnt exist. This will allow us to override the provider file e.g. Verrazzano
+	err := createConfigMapIfDoesntExist(controller, vmo, vmo.Spec.Grafana.DashboardsConfigMap, dashboardTemplateMap)
+	if err != nil {
+		zap.S().Errorf("Failed to create dashboard configmap %s, for reason %v", vmo.Spec.Grafana.DashboardsConfigMap, err)
+		return err
 
-		}
-		configMaps = append(configMaps, vmo.Spec.Grafana.DashboardsConfigMap)
-
-		//configmap for grafana datasources
-		replaceMap := map[string]string{constants.GrafanaTmplPrometheusURI: resources.GetMetaName(vmo.Name, config.Prometheus.Name),
-			constants.GrafanaTmplAlertManagerURI: resources.GetMetaName(vmo.Name, config.AlertManager.Name)}
-		dataSourceTemplate, err := asDashboardTemplate(constants.DataSourcesTmpl, replaceMap)
-		if err != nil {
-			zap.S().Errorf("Failed to create dashboard datasource template for vmo %s dur to %v", vmo.Name, err)
-			return err
-		}
-		err = createConfigMapIfDoesntExist(controller, vmo, vmo.Spec.Grafana.DatasourcesConfigMap, map[string]string{"datasource.yaml": dataSourceTemplate})
-		if err != nil {
-			zap.S().Errorf("Failed to create datasource configmap %s, for reason %v", vmo.Spec.Grafana.DatasourcesConfigMap, err)
-			return err
-		}
-		configMaps = append(configMaps, vmo.Spec.Grafana.DatasourcesConfigMap)
 	}
+	configMaps = append(configMaps, vmo.Spec.Grafana.DashboardsConfigMap)
+
+	//configmap for grafana datasources
+	replaceMap := map[string]string{constants.GrafanaTmplPrometheusURI: resources.GetMetaName(vmo.Name, config.Prometheus.Name),
+		constants.GrafanaTmplAlertManagerURI: resources.GetMetaName(vmo.Name, config.AlertManager.Name)}
+	dataSourceTemplate, err := asDashboardTemplate(constants.DataSourcesTmpl, replaceMap)
+	if err != nil {
+		zap.S().Errorf("Failed to create dashboard datasource template for vmo %s dur to %v", vmo.Name, err)
+		return err
+	}
+	err = createConfigMapIfDoesntExist(controller, vmo, vmo.Spec.Grafana.DatasourcesConfigMap, map[string]string{"datasource.yaml": dataSourceTemplate})
+	if err != nil {
+		zap.S().Errorf("Failed to create datasource configmap %s, for reason %v", vmo.Spec.Grafana.DatasourcesConfigMap, err)
+		return err
+
+	}
+	configMaps = append(configMaps, vmo.Spec.Grafana.DatasourcesConfigMap)
 
 	//configmap for alertmanager config
-	err := createAMConfigMapIfDoesntExist(controller, vmo, vmo.Spec.AlertManager.ConfigMap, map[string]string{constants.AlertManagerYaml: resources.GetDefaultAlertManagerConfiguration(vmo)})
+	err = createAMConfigMapIfDoesntExist(controller, vmo, vmo.Spec.AlertManager.ConfigMap, map[string]string{constants.AlertManagerYaml: resources.GetDefaultAlertManagerConfiguration(vmo)})
 	if err != nil {
 		zap.S().Errorf("Failed to create configmap %s for reason %v", vmo.Spec.AlertManager.ConfigMap, err)
 		return err
