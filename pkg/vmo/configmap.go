@@ -29,7 +29,7 @@ func CreateConfigmaps(controller *Controller, vmo *vmcontrollerv1.VerrazzanoMoni
 
 	// PABHAT : We don't need this for dev profile, for application deployment
 	// Configmap for Grafana dashboard
-	if resources.IsDevProfile() && vmo.Name != constants.SystemVMIName {
+	if resources.IsDevProfile() && vmo.Name == constants.SystemVMIName {
 		dashboardTemplateMap := map[string]string{"vmo-dashboard-provider.yml": constants.DashboardProviderTmpl}
 		// Only create the CM if it doesnt exist. This will allow us to override the provider file e.g. Verrazzano
 		err := createConfigMapIfDoesntExist(controller, vmo, vmo.Spec.Grafana.DashboardsConfigMap, dashboardTemplateMap)
